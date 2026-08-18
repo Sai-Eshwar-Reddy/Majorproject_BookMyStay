@@ -7,7 +7,8 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapasync.js");
 const ExpressError = require("./utils/expresserrors.js")
-const Joischema = require("./schema.js")
+const {listingJoiSchema,reviewJoiSchema}= require("./schema.js");
+const Review = require("./models/review.js");
 //to test api directly can remove later
 const cors = require("cors");
 app.use(cors());
@@ -51,7 +52,7 @@ app.get("/listings/:id",
     wrapAsync(   
     async (req,res) =>
     {
-        let individual_data = await Listing.findById(req.params.id);
+        let individual_data = await Listing.findById(req.params.id).populate("reviews");
         if (!individual_data) 
         {
             throw new ExpressError(404, "Listing not found");
@@ -65,7 +66,7 @@ app.post("/listings",
     wrapAsync(
     async (req,res) =>
     {
-        let result = Joischema.validate(req.body.new_listing);
+        let result = listingJoiSchema.validate(req.body.new_listing);
         if (result.error) {
             throw new ExpressError(400, result.error.details[0].message);
         }
@@ -92,7 +93,7 @@ app.get('/listings/:id/edit',
 app.put(
     "/listings/:id",
     wrapAsync(async (req, res) => {
-        let result = Joischema.validate(req.body.individual_data);
+        let result = listingJoiSchema.validate(req.body.individual_data);
         if (result.error) {
             throw new ExpressError(400,result.error.details[0].message);
         }
@@ -122,6 +123,37 @@ app.delete("/listings/:id",
             res.redirect("/listings");
         }
 ));
+
+// reviews route
+app.post("/listings/:id/reviews",
+    wrapAsync(async (req, res) => {
+        let result = reviewJoiSchema.validate(req.body);
+        if (result.error) {
+            throw new ExpressError(400, result.error.details[0].message);
+        }
+        let listing = await Listing.findById(req.params.id);
+        if (!listing) {
+            throw new ExpressError(404, "Listing not found");
+        }
+        let new_review = new Review(req.body.review);
+        await new_review.save();
+        listing.reviews.push(new_review);
+        await listing.save();
+        res.redirect(`/listings/${listing.id}`);
+    })
+);
+
+//Delete review route
+app.delete("/listings/:id/reviews/:reviewid",
+    wrapAsync(
+        async(req,res)=>{
+            let {id,reviewid}=req.params;
+            await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewid}});
+            await Review.findByIdAndDelete(reviewid);
+            res.redirect(`/listings/${id}`);
+        }
+    )
+);
 
 //Home or root route
 app.get ('/',(req,res)=>{
