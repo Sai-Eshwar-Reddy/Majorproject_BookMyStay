@@ -46,7 +46,6 @@ const listingSchema = new mongoose.Schema({
   }]
 });
 
-//Deletion handling
 // Deletion handling
 listingSchema.post("findOneAndDelete", async (listing) => {
   if(listing){
