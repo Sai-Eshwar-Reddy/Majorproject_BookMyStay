@@ -1,4 +1,44 @@
 <% layout("/layouts/boilerplate") -%>
+<!--Flash Review add and delete-->
+<% if (reviewSuccess && reviewSuccess.length > 0) { %>
+  <div id="review-success-alert" class="review-alert review-success">
+    <span class="review-icon">
+      <i class="bi bi-check-lg"></i>
+    </span>
+    <span><%= reviewSuccess[0] %></span>
+  </div>
+<% } %>
+<% if (reviewDelete && reviewDelete.length > 0) { %>
+  <div id="review-delete-alert" class="review-alert review-delete">
+    <span class="review-icon">
+      <i class="bi bi-trash3"></i>
+    </span>
+    <span><%= reviewDelete[0] %></span>
+  </div>
+<% } %>
+<!-- Listing Updated -->
+<% if (listingUpdated && listingUpdated.length > 0) { %>
+  <div class="review-alert listing-update">
+    <span class="review-icon">
+      <i class="bi bi-pencil"></i>
+    </span>
+    <span><%= listingUpdated[0] %></span>
+  </div>
+<% } %>
+<script>
+  setTimeout(() => {
+    const alerts = document.querySelectorAll(".review-alert");
+
+    alerts.forEach(alert => {
+      alert.style.transition = "opacity 0.3s ease";
+      alert.style.opacity = "0";
+
+      setTimeout(() => {
+        alert.remove();
+      }, 300);
+    });
+  }, 3000);
+</script>
 
 <div class="row mt-4">
     <div class="col-lg-8 offset-lg-2">

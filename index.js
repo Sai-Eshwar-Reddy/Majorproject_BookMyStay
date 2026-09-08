@@ -6,12 +6,18 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapasync.js");
-const ExpressError = require("./utils/expresserrors.js")
+const flash = require("connect-flash");
+const ExpressError = require("./utils/expresserrors.js");
+const session = require("express-session");
 const {listingJoiSchema,reviewJoiSchema}= require("./schema.js");
 const Review = require("./models/review.js");
 //to test api directly can remove later
 const cors = require("cors");
 app.use(cors());
+
+//Router imports
+const listings_router = require("./routes/listing.js");
+const reviews_router = require('./routes/review.js');
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
@@ -32,128 +38,34 @@ main()
     console.log(err);
 })
 
-//Index Route 
-app.get("/listings",
-    wrapAsync(
-    async (req,res) =>
-    {
-        let all_data = await Listing.find({});
-        res.render("listings/index.ejs",{all_data});
+//Express-sessions
+const session_options = {
+    secret : "Shouldberandom",
+    resave : false,
+    saveUninitialized : true,
+    Cookie: {
+        expires: Date.now() + 3 * 60 * 1000,
+        maxAge: 3 * 60 * 1000,
+        httpOnly : true
     }
-));
+}
 
-//Add route(Renders a form to add listings)
-app.get("/listings/new",(req,res)=>{
-    res.render("listings/addnew.ejs");
+//Session and flash middleware
+app.use(session(session_options));
+app.use(flash());
+
+app.use((req,res,next)=>{
+    res.locals.success = req.flash("success");
+    res.locals.deleted = req.flash("delete");
+    res.locals.reviewSuccess = req.flash("reviewSuccess");
+    res.locals.reviewDelete = req.flash("reviewDelete");
+    res.locals.listingUpdated = req.flash("listingUpdated");
+    next();
 })
 
-//Show Route(Renders individual listing details)
-app.get("/listings/:id",
-    wrapAsync(   
-    async (req,res) =>
-    {
-        let individual_data = await Listing.findById(req.params.id).populate("reviews");
-        if (!individual_data) 
-        {
-            throw new ExpressError(404, "Listing not found");
-        }
-        res.render("listings/show.ejs",{individual_data});
-    }
-));
-
-//create Rooute
-app.post("/listings",
-    wrapAsync(
-    async (req,res) =>
-    {
-        let result = listingJoiSchema.validate(req.body.new_listing);
-        if (result.error) {
-            throw new ExpressError(400, result.error.details[0].message);
-        }
-        let new_listing = new Listing(req.body.new_listing);
-        await new_listing.save();
-        res.redirect("/listings");
-    }
-));
-
-//Edit Route(Renders Edit Form)
-app.get('/listings/:id/edit',
-    wrapAsync(
-    async (req,res) =>
-    {
-        let individual_data = await Listing.findById(req.params.id);
-        if (!individual_data) {
-            throw new ExpressError(404, "Listing not found");
-        }
-        res.render("listings/edit.ejs",{individual_data});
-    }
-));
-
-//Update route
-app.put(
-    "/listings/:id",
-    wrapAsync(async (req, res) => {
-        let result = listingJoiSchema.validate(req.body.individual_data);
-        if (result.error) {
-            throw new ExpressError(400,result.error.details[0].message);
-        }
-        let updated_listing = await Listing.findByIdAndUpdate(
-            req.params.id,
-            req.body.individual_data,
-            {
-                runValidators: true
-            }
-        );
-        if (!updated_listing) {
-            throw new ExpressError(404, "Listing not found");
-        }
-        res.redirect(`/listings/${req.params.id}`);
-    })
-);
-
-//Delete route 
-app.delete("/listings/:id",
-    wrapAsync(
-        async (req,res)=>
-        {
-            let deleted_listing = await Listing.findByIdAndDelete(req.params.id);
-            if (!deleted_listing) {
-                throw new ExpressError(404, "Listing not found");
-            }
-            res.redirect("/listings");
-        }
-));
-
-// reviews route
-app.post("/listings/:id/reviews",
-    wrapAsync(async (req, res) => {
-        let result = reviewJoiSchema.validate(req.body);
-        if (result.error) {
-            throw new ExpressError(400, result.error.details[0].message);
-        }
-        let listing = await Listing.findById(req.params.id);
-        if (!listing) {
-            throw new ExpressError(404, "Listing not found");
-        }
-        let new_review = new Review(req.body.review);
-        await new_review.save();
-        listing.reviews.push(new_review);
-        await listing.save();
-        res.redirect(`/listings/${listing.id}`);
-    })
-);
-
-//Delete review route
-app.delete("/listings/:id/reviews/:reviewid",
-    wrapAsync(
-        async(req,res)=>{
-            let {id,reviewid}=req.params;
-            await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewid}});
-            await Review.findByIdAndDelete(reviewid);
-            res.redirect(`/listings/${id}`);
-        }
-    )
-);
+//Router
+app.use('/listings',listings_router);
+app.use('/listings/:id/reviews',reviews_router);
 
 //Home or root route
 app.get ('/',(req,res)=>{

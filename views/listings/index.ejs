@@ -1,6 +1,47 @@
 <% layout("/layouts/boilerplate") -%>
 <body>
-    <h3>All listings</h3>
+    <!--Success flash-->
+    <% if (success && success.length > 0) { %>
+        <div id="success-alert" class="success-alert">
+            <span class="success-icon">✓</span>
+            <span><%= success[0] %></span>
+        </div>
+    <% } %>
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById("success-alert");
+            if (alert) {
+                alert.style.transition = "opacity 0.3s ease";
+                alert.style.opacity = "0";
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }}, 3000);
+    </script>
+
+    <!--Delete Flash-->
+    <% if (deleted && deleted.length > 0) { %>
+        <div id="delete-alert" class="delete-alert">
+        <span class="delete-icon">
+            <i class="bi bi-trash3"></i>
+        </span>
+        <span><%= deleted[0] %></span>
+        </div>
+    <% } %>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.getElementById("delete-alert");
+            if (alert) {
+                alert.style.transition = "opacity 0.3s ease";
+                alert.style.opacity = "0";
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }}, 3000);
+    </script>
+
+    <br><br>
     <div class="row row-cols-lg-3 row-cols-md-3 row-cols-sm-1">
         <% for(let listing of all_data) { %>
         <a href="/listings/<%=listing._id%>" class="listing-link">
