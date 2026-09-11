@@ -11,6 +11,9 @@ const ExpressError = require("./utils/expresserrors.js");
 const session = require("express-session");
 const {listingJoiSchema,reviewJoiSchema}= require("./schema.js");
 const Review = require("./models/review.js");
+const passport = require("passport");
+const Localstrategy = require("passport-local");
+const User = require("./models/users.js");
 //to test api directly can remove later
 const cors = require("cors");
 app.use(cors());
@@ -18,6 +21,7 @@ app.use(cors());
 //Router imports
 const listings_router = require("./routes/listing.js");
 const reviews_router = require('./routes/review.js');
+const users_router = require('./routes/user.js');
 
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"views"));
@@ -43,7 +47,7 @@ const session_options = {
     secret : "Shouldberandom",
     resave : false,
     saveUninitialized : true,
-    Cookie: {
+    cookie: {
         expires: Date.now() + 3 * 60 * 1000,
         maxAge: 3 * 60 * 1000,
         httpOnly : true
@@ -54,18 +58,29 @@ const session_options = {
 app.use(session(session_options));
 app.use(flash());
 
+//passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new Localstrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+//Flash middleware
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.deleted = req.flash("delete");
     res.locals.reviewSuccess = req.flash("reviewSuccess");
     res.locals.reviewDelete = req.flash("reviewDelete");
     res.locals.listingUpdated = req.flash("listingUpdated");
+    res.locals.error = req.flash("error");
     next();
 })
 
 //Router
 app.use('/listings',listings_router);
 app.use('/listings/:id/reviews',reviews_router);
+app.use('/',users_router);
 
 //Home or root route
 app.get ('/',(req,res)=>{

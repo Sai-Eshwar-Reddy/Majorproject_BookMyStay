@@ -1,0 +1,78 @@
+<% layout("/layouts/boilerplate") -%>
+
+<% if (success && success.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <%= success[0] %>
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+        ></button>
+    </div>
+<% } %>
+
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6 offset-md-3">
+            <h1 class="mb-4">Sign Up</h1>
+            <form action="/signup" method="POST" class="needs-validation" novalidate>
+                <!-- Username -->
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input
+                        name="username"
+                        id="username"
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter username"
+                        required
+                    >
+                    <% if (error && error.length > 0) { %>
+                    <div class="text-danger mt-2">
+                        <%= error[0] %>
+                    </div>
+                    <% } %>
+                    <div class="invalid-feedback">
+                        Please enter a valid username.
+                    </div>
+                </div>
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input
+                        name="email"
+                        id="email"
+                        type="email"
+                        class="form-control"
+                        placeholder="Enter email"
+                        required
+                    >
+                    <div class="invalid-feedback">
+                        Please enter a valid email address.
+                    </div>
+                </div>
+                <!-- Password -->
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input
+                        name="password"
+                        id="password"
+                        type="password"
+                        class="form-control"
+                        placeholder="Enter password"
+                        required
+                        minlength="8"
+                    >
+                    <div class="invalid-feedback">
+                        Password must be at least 8 characters long.
+                    </div>
+                </div>
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary">
+                    Sign Up
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
