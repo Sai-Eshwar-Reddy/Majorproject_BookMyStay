@@ -20,14 +20,21 @@
     </script>
 
     <!--Delete Flash-->
-    <% if (deleted && deleted.length > 0) { %>
-        <div id="delete-alert" class="delete-alert">
-        <span class="delete-icon">
-            <i class="bi bi-trash3"></i>
+<% if (error && error.length > 0) { %>
+    <div id="error-alert" class="error-alert">
+        <span class="error-icon">
+            <i class="bi bi-exclamation-circle-fill"></i>
         </span>
-        <span><%= deleted[0] %></span>
-        </div>
-    <% } %>
+        <span><%= error[0] %></span>
+        <button 
+            type="button" 
+            class="error-close"
+            onclick="document.getElementById('error-alert').remove()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+<% } %>
+
 
     <script>
         setTimeout(() => {

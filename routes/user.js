@@ -3,6 +3,7 @@ const wrapasync = require("../utils/wrapasync");
 const User = require("../models/users.js");
 const passport = require("passport");
 const router = express.Router();
+const {saveredirectUrl} = require("../middleware.js")
 
 //Sign up route
 router.get("/signup", (req, res) => {
@@ -18,8 +19,14 @@ router.post(
                 email
             });
             const registeredUser = await User.register(newUser, password);
-            req.flash("success", "Sign up completed successfully!");
-            res.redirect("/listings");
+            req.login(registeredUser,(err)=>{
+                if(err)
+                {
+                    return next(err);
+                }
+                req.flash("success", "Sign up completed successfully!");
+                res.redirect("/listings");
+            })
         } catch (e) {
             if (e.name === "UserExistsError") {
                 req.flash("error", "Username already exists. Please choose another.");
@@ -39,15 +46,35 @@ router.get("/login", (req, res) => {
 
 router.post(
     "/login",
+    saveredirectUrl,
     passport.authenticate("local", {
         failureRedirect: "/login",
         failureFlash: "Incorrect username or password."
     }),
     (req, res) => {
         req.flash("success", "Logged in successfully");
-        res.redirect("/listings");
+        if(res.locals.redirectUrl)
+        {
+            res.redirect(res.locals.redirectUrl);
+        }
+        else
+        {
+            res.redirect("/listings");
+        }
     }
 );
+
+//Logout Router
+router.get("/logout",(req,res)=>{
+    req.logOut((err)=>{
+        if(err)
+        {
+            return next(err);
+        }
+        req.flash("success","Loggedout successfully");
+        res.redirect("/");
+    })
+})
 
 module.exports = router;
 

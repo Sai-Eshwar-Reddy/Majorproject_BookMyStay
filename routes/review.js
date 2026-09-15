@@ -6,9 +6,9 @@ const wrapAsync = require("../utils/wrapasync.js");
 const ExpressError = require("../utils/expresserrors.js");
 const { reviewJoiSchema } = require("../schema.js");
 const Listing = require("../models/listing.js");
-
+const {isLoggedin} = require("../middleware.js");
 // reviews route
-router.post("/",
+router.post("/",isLoggedin,
     wrapAsync(async (req, res) => {
         let result = reviewJoiSchema.validate(req.body);
         if (result.error) {
@@ -29,7 +29,7 @@ router.post("/",
 
 
 //Delete review route
-router.delete("/:reviewid",
+router.delete("/:reviewid",isLoggedin,
     wrapAsync(
         async(req,res)=>{
             let {id,reviewid}=req.params;

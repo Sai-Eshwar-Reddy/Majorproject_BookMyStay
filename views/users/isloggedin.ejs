@@ -1,0 +1,73 @@
+<div class="auth-container">
+    <h1>Login Required</h1>
+    <div class="auth-actions">
+        <form action="/login" method="GET">
+            <p>Already have an account?</p>
+            <br>
+            <button type="submit" class="auth-btn login-btn">
+                Login
+            </button>
+        </form>
+        <form action="/signup" method="GET">
+            <button type="submit" class="auth-btn signup-btn">
+                Create an Account
+            </button>
+        </form>
+    </div>
+</div>
+<style>
+    .auth-container {
+        width: 45%;
+        margin: 80px auto;
+        text-align: center;
+    }
+    .auth-container h1 {
+        font-size: 42px;
+        font-weight: 500;
+        margin-bottom: 40px;
+        color: #222;
+    }
+    .auth-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+    .auth-actions form {
+        width: 100%;
+        max-width: 300px;
+    }
+    .auth-actions p {
+        font-size: 17px;
+        color: #333;
+        margin: 0 0 12px;
+    }
+    .auth-btn {
+        width: 100%;
+        padding: 11px 20px;
+        border-radius: 6px;
+        font-size: 17px;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+    /* Login button */
+    .login-btn {
+        background-color: #0d6efd;
+        color: white;
+        border: 1px solid #0d6efd;
+    }
+    .login-btn:hover {
+        background-color: #0b5ed7;
+        border-color: #0b5ed7;
+    }
+    /* Create account button */
+    .signup-btn {
+        background-color: white;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+    .signup-btn:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+</style>

@@ -74,6 +74,7 @@ app.use((req,res,next)=>{
     res.locals.reviewDelete = req.flash("reviewDelete");
     res.locals.listingUpdated = req.flash("listingUpdated");
     res.locals.error = req.flash("error");
+    res.locals.currentUser = req.user;
     next();
 })
 
